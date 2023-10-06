@@ -177,7 +177,7 @@ def select_next (frontier):
     return (selected, selected_idx)
 
 
-
+#heuristic = manhattan distance sum
 def A_star (board, solution):
     tree_1 = tree.Tree(board, 0)
     f = tree_1.root.path_cost + sum_distances(tree_1.root)
@@ -209,6 +209,49 @@ def A_star (board, solution):
                     f = child.path_cost + sum_distances(child)
                     child.set_f(f)
                     frontier[child_idx] = child
+
+
+def count_misplaced (node):
+    count = 0
+    misplaced = 0
+    for i in range (len(node.value.board)):
+        for j in range (len(node.value.board[0])):
+            count += 1
+            if node.value.board[i][j] != count:
+                misplaced += 1
+            
+            if node.value.board[i][j] == 0 and (i!= (len(node.value.board)-1) or j != (len(node.value.board[0])-1)):
+                misplaced += 1
+    
+    return misplaced
+
+
+#heuristic = num pieces misplaced
+def GBFS (board, solution):
+    tree_1 = tree.Tree(board, 0)
+    f = tree_1.root.path_cost + count_misplaced(tree_1.root)
+    tree_1.root.set_f (f)
+
+    frontier = [tree_1.root]
+    explored = []
+
+    while (len(frontier) > 0):
+        exploring, exploring_idx = select_next (frontier)
+
+        if solution.compare_boards(exploring.value):
+            return exploring
+        
+        frontier.pop(exploring_idx)
+
+        explored.append(exploring)
+
+        generate_children(exploring)
+
+        for child in exploring.children:
+            if (not(search_state(child.value, explored)) and not (search_state(child.value, frontier))):
+                f = child.path_cost + sum_distances(child)
+                child.set_f(f)
+                frontier.append(child)
     
 
 
