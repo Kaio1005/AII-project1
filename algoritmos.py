@@ -1,5 +1,6 @@
 import tree
 import tabuleiro
+import random
 
 def generate_children (node):
     zero_idx = node.value.find_zero()
@@ -49,16 +50,17 @@ def BFS (board, solution):
                     else:
                         frontier.append(child)
 
-#need changes
+#need changes, priority queue not a simple queue, what is the cost in that case?
 def UCS (board, solution):
     tree_1 = tree.Tree(board,0)
     frontier = [tree_1.root]
     explored = []
 
     while(len(frontier) > 0):
-        exploring = frontier.pop(0)
+        exploring, exploring_idx = select_next (frontier)
         if solution.compare_boards(exploring.value):
             return (exploring)
+        frontier.pop(exploring_idx)
         explored.append(exploring)
         generate_children(exploring)
 
@@ -71,69 +73,37 @@ def UCS (board, solution):
                         frontier[i] = child
 
 
-#need to work on IDS
-'''              
-def IDS (board, solution):
-    tree_1 = tree.Tree(board, 0)
-
-    max_depth = 0
-
-    while True:
-        frontier = [tree_1.root]
-        explored = []
-
-        while (len(frontier) > 0):
-            exploring = frontier.pop(0)
-
-            if solution.compare_boards(exploring.value):
-                return exploring
-            
-            explored.append(exploring)
-            if exploring.path_cost < max_depth:
-                generate_children(exploring)
-                for child in exploring.children:
-                    if (not (search_state(child.value, explored)) or not (search_state(child.value, frontier))):
-                        frontier.append(child)
-            
-        max_depth += 1
-'''
-
-def IDS (board, solution):
+def IDS (board, solution, max_depth):
     #Change to iterative
     limit = 0
     tree_1 = tree.Tree(board, 0)
 
-    while True:
+    while limit < max_depth:
         result = DFS(tree_1.root, solution, limit)
 
-        if type(result) is not str:
+        if result != None:
             return result
-        elif result == "cutoff":
-            limit += 1
-        elif result == "failure":
-            return None
+    
+    return None
 
 def DFS (node, solution, limit):
     if solution.compare_boards(node.value):
         return (node)
-    if limit == 0:
-        return ("cutoff")
-    
-    cutoff_occured = False
-    generate_children(node)
-    
-    for child in node.children:
-        result = DFS(child, solution, limit-1)
-        if type(result) is not str:
-            return result
-        elif result == "cutoff":
-            cutoff_occured = True
-        
-    if cutoff_occured:
-        return "cutoff"
     else:
-        return "failure"
-
+        frontier = [node]
+        explored = []
+        while(len(frontier) > 0):
+            exploring = frontier.pop(0)
+            if exploring.path_cost < limit:
+                explored.append(exploring)
+                generate_children(exploring)
+            
+                for child in exploring.children:
+                    if (not(search_state(child.value, frontier)) and not(search_state(child.value, explored))):
+                        if solution.compare_boards(child.value):
+                            return (child)
+                        else:
+                            frontier.append(child)
 
 def manhattan_distance (node, piece_i, piece_j):
     piece = node.value.board[piece_i][piece_j]
@@ -252,12 +222,47 @@ def GBFS (board, solution):
                 f = child.path_cost + sum_distances(child)
                 child.set_f(f)
                 frontier.append(child)
+
+
+
+def hill_climbing (board, k, max_it):
+    tree_1 = tree.Tree(board, 0)
+    f = count_misplaced(tree_1.root)
+    tree_1.root.set_f(f)
+    iteration = 0
+    current_sol = tree_1.root
+
+    while (iteration < max_it):
+        generate_children(current_sol)
+
+        best_child = None
+        best_evaluation = current_sol.f
+
+        for child in current_sol.children:
+            f = count_misplaced(child)
+            child.set_f (f)
+
+            if child.f < best_evaluation:
+                best_child = child
+                best_evaluation = child.f
+        
+        if best_child is None:
+            return current_sol
+        
+        if best_evaluation == current_sol.f:
+            lateral_moves = 0
+            while lateral_moves < k:
+                random_neighbor = random.choice(current_sol.children)
+
+                if random_neighbor.f < current_sol.f:
+                    current_sol = random_neighbor
+                    break
+
+                lateral_moves += 1
+        
+        else:
+            current_sol = best_child
+        
+        iteration += 1
     
-
-
-
-
-    
-
-
-    
+    return current_sol

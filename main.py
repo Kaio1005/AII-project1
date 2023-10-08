@@ -2,11 +2,11 @@ import algoritmos
 import sys
 import tabuleiro
 
-board_1 = tabuleiro.Board([[1,2,3],[4,5,6],[7,8,0]], True)
+board_1 = tabuleiro.Board([[8,6,7],[2,5,4],[3,0,1]], True)
 
 solution = tabuleiro.Board([[1,2,3],[4,5,6],[7,8,0]], False)
 
-solution = algoritmos.A_star(board_1, solution)
+solution = algoritmos.BFS(board_1, solution)
 
 if solution is not None:
     print(solution.path_cost)
