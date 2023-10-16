@@ -8,3 +8,10 @@ Caso o sistema tenha mais de uma versão do python instalada, saiba que o progra
 python3 TP1.py
 
 Seguido da entrada no formato descrito nas especificações do trabalho: Algoritmo Estado_Inicial PRINT
+
+More work is yet to come on vacation time.
+
+To do:
+-Hill Climbing with lateral steps
+-Iterative Deepening Search
+-Test implementation with some test framework
