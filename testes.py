@@ -1,13 +1,17 @@
 import algoritmos
 import sys
 import tabuleiro
+import time
 
-board_1 = tabuleiro.Board([[8,6,7],[2,5,4],[3,0,1]], True)
+board_1 = tabuleiro.Board([[0,8,7],[5,6,4],[1,2,3]], False)
 
 solution = tabuleiro.Board([[1,2,3],[4,5,6],[7,8,0]], False)
 
-solution = algoritmos.BFS(board_1, solution)
+start = time.time()
+solution = algoritmos.A_star(board_1, solution)
+end = time.time()
 
+print (end-start)
 if solution is not None:
     print(solution.path_cost)
     if solution.value.print:

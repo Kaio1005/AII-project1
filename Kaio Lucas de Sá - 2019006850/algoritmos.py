@@ -73,37 +73,37 @@ def UCS (board, solution):
                         frontier[i] = child
 
 
-def IDS (board, solution, max_depth):
+def IDS (board, solution):
     #Change to iterative
     limit = 0
     tree_1 = tree.Tree(board, 0)
+    frontier = []
+    explored = []
 
-    while limit < max_depth:
-        result = DFS(tree_1.root, solution, limit)
-
-        if result != None:
-            return result
+    if solution.compare_boards (tree_1.root.value):
+        return (tree_1.root)
     
-    return None
+    while True:
+        frontier.append(tree_1.root)
 
-def DFS (node, solution, limit):
-    if solution.compare_boards(node.value):
-        return (node)
-    else:
-        frontier = [node]
-        explored = []
-        while(len(frontier) > 0):
-            exploring = frontier.pop(0)
-            if exploring.path_cost < limit:
-                explored.append(exploring)
-                generate_children(exploring)
-            
-                for child in exploring.children:
-                    if (not(search_state(child.value, frontier)) and not(search_state(child.value, explored))):
-                        if solution.compare_boards(child.value):
-                            return (child)
-                        else:
-                            frontier.append(child)
+        while (len(frontier) > 0):
+            exploring = frontier.pop()
+
+            if (exploring.path_cost > limit):
+                continue
+            generate_children(exploring)
+
+            for child in exploring.children:
+                if (solution.compare_boards(child.value)):
+                    return child
+                elif (not(search_state(child.value, frontier) and not (search_state(child.value, explored)))):
+                    frontier.append(child)
+
+            explored.append(exploring)
+        
+        explored.clear()
+        frontier.clear()
+        limit+=1
 
 def manhattan_distance (node, piece_i, piece_j):
     piece = node.value.board[piece_i][piece_j]
@@ -175,7 +175,8 @@ def A_star (board, solution):
                     f = child.path_cost + sum_distances(child)
                     child.set_f(f)
                     frontier.append(child)
-                elif child.path_cost < frontier[child_idx].path_cost:
+                elif child.path_cost > exploring.path_cost + (child.path_cost - exploring.path_cost):
+                    child.path_cost = exploring.path_cost + (child.path_cost - exploring.path_cost)
                     f = child.path_cost + sum_distances(child)
                     child.set_f(f)
                     frontier[child_idx] = child
@@ -224,7 +225,7 @@ def GBFS (board, solution):
                 frontier.append(child)
 
 
-
+#need changes
 def hill_climbing (board, k, max_it):
     tree_1 = tree.Tree(board, 0)
     f = count_misplaced(tree_1.root)
